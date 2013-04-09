@@ -27,4 +27,14 @@
         android:text="Rec"
         android:onClick="onRecordClick" />
 
+    <TextView
+        android:id="@+id/textViewFrameCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/toggleButtonRec"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp"
+        android:text="0"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>

@@ -5,18 +5,22 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MediaRecordTestActivity extends Activity implements SurfaceHolder.Callback {
+	private static final String TAG = "MediaRecorderExample";
 
 	Camera mCamera;
 	MediaRecorder mMediaRecorder;
@@ -76,19 +80,38 @@ public class MediaRecordTestActivity extends Activity implements SurfaceHolder.C
 		}
 	}
 	
+	private int nFrameCount = 0;
+	
 	private void startRecord() throws IllegalStateException, IOException {
 		mCamera.unlock();
-		
+
 		mMediaRecorder = new MediaRecorder();
 		mMediaRecorder.setCamera(mCamera);
 		mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 		mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-		mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+		
+		if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_1080P)) {
+			mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));
+		}
+		else {
+			mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+		}
 		
 		File outputFile = new File(Environment.getExternalStorageDirectory(), "hello.mp4");
 		mMediaRecorder.setOutputFile(outputFile.getCanonicalPath());
 		mMediaRecorder.prepare();
 		mMediaRecorder.start();
+		
+		final TextView frameCountView = (TextView) findViewById(R.id.textViewFrameCount); 
+		mCamera.setPreviewCallback(new PreviewCallback() {
+		
+			@Override
+			public void onPreviewFrame(byte[] data, Camera camera) {
+				Log.d(TAG, "Receive data size: " + data.length);
+				frameCountView.setText(String.valueOf(++nFrameCount));
+			}
+			
+		});
 	}
 	
 	private void stopRecord() {
@@ -98,7 +121,8 @@ public class MediaRecordTestActivity extends Activity implements SurfaceHolder.C
 			mMediaRecorder.release();
 			mMediaRecorder = null;
 			
-			mCamera.lock();
+			mCamera.setPreviewCallback(null);
+			mCamera.lock();			
 		}
 	}
 
@@ -110,14 +134,11 @@ public class MediaRecordTestActivity extends Activity implements SurfaceHolder.C
 			e.printStackTrace();
 		}
 		
-		mCamera.startPreview();		
+		mCamera.startPreview();			
 	}
 
 	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		// TODO Auto-generated method stub
-		
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 	}
 
 	@Override
