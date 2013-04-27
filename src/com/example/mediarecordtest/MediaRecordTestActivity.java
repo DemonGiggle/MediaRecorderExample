@@ -87,6 +87,7 @@ public class MediaRecordTestActivity extends Activity implements SurfaceHolder.C
 
 		mMediaRecorder = new MediaRecorder();
 		mMediaRecorder.setCamera(mCamera);
+        mMediaRecorder.setPreviewDisplay(mSurface.getHolder().getSurface());
 		mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 		mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 		
